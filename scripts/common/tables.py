@@ -6,6 +6,7 @@ Base = declarative_base()
 class DriveAll(Base):
     __tablename__ = "drive"
 
+    id = Column(Integer, primary_key=True)
     trip_id = Column(String(55))
     datetime = Column(String(55))
     vehicle_spec_id = Column(Integer)
@@ -41,7 +42,7 @@ class VehicleAll(Base):
     fuel_economy_city = Column(Integer)
     fuel_economy_highway = Column(Integer)
     cylinders = Column(Integer)
-    forced_induction = Column(Integer)
+    forced_induction = Column(Integer,nullable=True)
     device_generation = Column(Integer)
     # # Create a unique transaction id
     # # all non-string columns are casted as string

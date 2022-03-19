@@ -12,8 +12,7 @@ engine = create_engine("postgresql+psycopg2://"+DATABASE_USERNAME+":postgres@loc
 session = Session(engine)
 query = """
 CREATE TABLE vehicle (
-    id SERIAL PRIMARY KEY,
-    vehicle_spec_id INT,
+    vehicle_spec_id INT PRIMARY KEY,
     year INT,
     make VARCHAR (50),
     Model VARCHAR (50),
@@ -22,18 +21,19 @@ CREATE TABLE vehicle (
     max_horsepower INT,
     max_horsepower_rpm INT,
     max_torque_rpm INT,
-    engine_displacement INT,
+    engine_displacement DECIMAL,
     fuel_type INT,
     fuel_tank_capacity INT,
-    fuel_economy_city INT,
-    fuel_economy_highway INT,
+    fuel_economy_city DECIMAL,
+    fuel_economy_highway DECIMAL,
     cylinders INT,
-    forced_induction INT,
+    forced_induction INT DEFAULT NULL,
     device_generation INT,
     UNIQUE (vehicle_spec_id)
     );
 
 CREATE TABLE drive (
+    id SERIAL PRIMARY KEY,
     trip_id VARCHAR (50),
     datetime TIMESTAMP NOT NULL,
     vehicle_spec_id INT,
@@ -45,10 +45,9 @@ CREATE TABLE drive (
     lat INT,
     long INT,
     velocity INT,
-    PRIMARY KEY(vehicle_spec_id),
-        CONSTRAINT fk_vehicle_spec_id
+    CONSTRAINT fk_vehicle_spec_id
         FOREIGN KEY(vehicle_spec_id) 
-        REFERENCES vehicle(vehicle_spec_id)
+            REFERENCES vehicle(vehicle_spec_id)
     );
 
 """
