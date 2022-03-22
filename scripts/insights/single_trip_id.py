@@ -1,10 +1,11 @@
 from datetime import datetime
 import os
-
-from base import session
-from tables import DriveAll
+import sys
 import xlsxwriter
 
+sys.path.append('..')
+from common.base import session
+from common.tables import DriveAll
 # Settings
 base_path = os.path.abspath(__file__ + "/../../../")
 ref_month = datetime.today().strftime("%Y-%m")
