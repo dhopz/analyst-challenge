@@ -12,19 +12,15 @@ base_path = os.path.abspath(__file__ + "/../../")
 vehicle_path = f"{base_path}/data/raw/new_vehicle.csv"
 drive_path = f"{base_path}/data/raw/new_drive.csv"
 
-def truncate_table():
-    """
-    Ensure that the tables are in an empty state before running any transformations.
-    And primary key (id) restarts from 1.
-    """
-    clear_tables = [
-        "TRUNCATE TABLE vehicle ;ALTER SEQUENCE vehicle_id_seq RESTART;",
-        "TRUNCATE TABLE drive ;ALTER SEQUENCE drive_id_seq RESTART;"
-        ]
+def truncate_vehicle_table():
+    session.execute(
+        text("TRUNCATE TABLE vehicle ;ALTER SEQUENCE vehicle_id_seq RESTART;"))
+    session.commit()
 
-    for table in clear_tables:
-        session.execute(text(table))
-        session.commit()
+def truncate_drive_table():
+    session.execute(
+        text("TRUNCATE TABLE drive ;ALTER SEQUENCE drive_id_seq RESTART;"))
+    session.commit()
 
 def load_new_vehicle_data():
     """
@@ -67,7 +63,8 @@ def load_new_drive_data():
 def main():
     print("[Load] Start")   
     print("[Load] Truncating table")  
-    truncate_table  
+    truncate_vehicle_table  
+    truncate_drive_table
     print("[Load] Data going in Postgres...")
     load_new_vehicle_data()
     print('[Load] Vehicle Data complete')
