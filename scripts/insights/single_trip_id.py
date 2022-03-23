@@ -15,7 +15,6 @@ if __name__ == "__main__":
         '''SELECT * FROM drive
         WHERE trip_id = '00922df3be5a4589ab385d0c2da2dd81';'''
         ).all()
-    ref_month = datetime.today().strftime("%Y-%m")
     
     # Create the workbook
     workbook = xlsxwriter.Workbook(

@@ -17,13 +17,14 @@ def distancer(row):
 if __name__ == "__main__":
     #Extract data from database
     data = session.execute(
-        '''SELECT datetime, trip_id, make, model, lat, long
+        '''
+        SELECT datetime, trip_id, make, model, lat, long, velocity
         FROM drive
-        INNER JOIN vehicle on vehicle.vehicle_spec_id = drive.vehicle_spec_id'''
+        INNER JOIN vehicle on vehicle.vehicle_spec_id = drive.vehicle_spec_id;'''
         ).all()
 
     #Create Dataframe 
-    df = pd.DataFrame(data, columns=['Datetime','trip_id','make','model','lat','long'])
+    df = pd.DataFrame(data, columns=['Datetime','trip_id','make','model','lat','long','velocity'])
     #Manipulate data to get distance travelled using function Distancer 
     df['next_lat'] = df.groupby('trip_id')['lat'].shift(1)
     df['next_long'] = df.groupby('trip_id')['long'].shift(1)
@@ -39,10 +40,15 @@ if __name__ == "__main__":
     df['timestamp_end'].fillna(df['Datetime'], inplace=True)
     df['trip_duration_minutes'].fillna(0,inplace=True)
 
+    #Applying Distancer to each row, could probably do Vectorisation
     df['distance'] = df.apply(distancer, axis=1)
 
+    #Import into SQL
     conn = engine.connect()
     df.to_sql('daily_trip', conn, if_exists='replace')
+    print("Dataframe exported to PSQL")
+
+
 
 
     # df.to_excel(f"{base_path}/data/insights/DailyTrip.xlsx")
