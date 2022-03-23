@@ -14,8 +14,7 @@ def distancer(row):
     coords_2 = (row['next_lat'], row['next_long'])
     return geopy.distance.distance(coords_1, coords_2).km
 
-if __name__ == "__main__":
-    #Extract data from database
+def create_dataframe():
     data = session.execute(
         '''
         SELECT datetime, trip_id, make, model, lat, long, velocity
@@ -23,8 +22,13 @@ if __name__ == "__main__":
         INNER JOIN vehicle on vehicle.vehicle_spec_id = drive.vehicle_spec_id;'''
         ).all()
 
-    #Create Dataframe 
     df = pd.DataFrame(data, columns=['Datetime','trip_id','make','model','lat','long','velocity'])
+
+    return df
+
+def calc_distance_using_lat_long():
+    df = create_dataframe()
+
     #Manipulate data to get distance travelled using function Distancer 
     df['next_lat'] = df.groupby('trip_id')['lat'].shift(1)
     df['next_long'] = df.groupby('trip_id')['long'].shift(1)
@@ -45,11 +49,35 @@ if __name__ == "__main__":
 
     #Import into SQL
     conn = engine.connect()
-    df.to_sql('daily_trip', conn, if_exists='replace')
-    print("Dataframe exported to PSQL")
+    df.to_sql('daily_trip_long_lat_calc', conn, if_exists='replace')
+    print("Dataframe lat and lon calculation exported to PSQL")
 
 
+def calc_distance_using_velocity():
+    df = create_dataframe()
+
+    #Converts UTC to Pacific standard time
+    df['Datetime'] = df['Datetime'].dt.tz_localize('utc').dt.tz_convert('US/Pacific')
+
+    #Change dataframe to get the difference between the timestamps
+    df['timeMax'] = df.groupby(df['trip_id'])['Datetime'].transform('max')
+    df['timeMin'] = df.groupby(df['trip_id'])['Datetime'].transform('min')
+    df['trip_duration_minutes'] = round((df['timeMax'] - df['timeMin'])/np.timedelta64(1,'m'))
+
+    #Groupby to get average velocity over the trip_id
+    df = df.groupby(['trip_id','make','model','trip_duration_minutes'])['velocity'].mean().reset_index()
+    df = df.rename(columns={'velocity':'average_velocity'})
+
+    #Calculate distance travelled
+    df['distance_travelled'] = (df['trip_duration_minutes']/60) * df['average_velocity']
+
+    #Import into SQL
+    conn = engine.connect()
+    df.to_sql('daily_trip_velocity_calc', conn, if_exists='replace')
+    print("Dataframe velocity calculation exported to PSQL")
 
 
-    # df.to_excel(f"{base_path}/data/insights/DailyTrip.xlsx")
-    # print("Dataframe exported")
+if __name__ == "__main__":
+    calc_distance_using_lat_long()
+    calc_distance_using_velocity()
+    print('[Load] Dataframes to PSQL')
