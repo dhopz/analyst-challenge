@@ -16,11 +16,13 @@ def truncate_vehicle_table():
     session.execute(
         text("TRUNCATE TABLE vehicle ;ALTER SEQUENCE vehicle_id_seq RESTART;"))
     session.commit()
+    print('[Load] Vehicle Table truncated')
 
 def truncate_drive_table():
     session.execute(
         text("TRUNCATE TABLE drive ;ALTER SEQUENCE drive_id_seq RESTART;"))
     session.commit()
+    print("['Load'] Drive table Truncated")
 
 def load_new_vehicle_data():
     """

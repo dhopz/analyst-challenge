@@ -36,7 +36,7 @@ def calc_distance_using_lat_long():
     df['next_long'].fillna(df['long'], inplace=True)
 
     #Converts UTC to Pacific standard time
-    df['Datetime'] = df['Datetime'].dt.tz_localize('utc').dt.tz_convert('US/Pacific')
+    #df['Datetime'] = df['Datetime'].dt.tz_localize('utc').dt.tz_convert('US/Pacific')
 
     #Change dataframe to get the difference between the timestamps
     df['timestamp_end'] = df.groupby('trip_id')['Datetime'].shift(1)
@@ -57,7 +57,7 @@ def calc_distance_using_velocity():
     df = create_dataframe()
 
     #Converts UTC to Pacific standard time
-    df['Datetime'] = df['Datetime'].dt.tz_localize('utc').dt.tz_convert('US/Pacific')
+    #df['Datetime'] = df['Datetime'].dt.tz_localize('utc').dt.tz_convert('US/Pacific')
 
     #Change dataframe to get the difference between the timestamps
     df['timeMax'] = df.groupby(df['trip_id'])['Datetime'].transform('max')
@@ -78,6 +78,7 @@ def calc_distance_using_velocity():
 
 
 if __name__ == "__main__":
+    print('[Load] Converting Data')
     calc_distance_using_lat_long()
     calc_distance_using_velocity()
     print('[Load] Dataframes to PSQL')
